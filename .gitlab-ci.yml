@@ -48,7 +48,7 @@ release:
   # This runs only when we have a push to a branch that has a tag (it's a release), the tag must follow the semantic versioning
   # should only run when the branch is tested successfully
   rules:
-    - if: '$CI_COMMIT_TAG' == /^v\d+\.\d+\.\d+/ # This is a regular expression that matches semantic versioning
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+/ # This is a regular expression that matches semantic versioning
   
   tags:
     - docker-build
