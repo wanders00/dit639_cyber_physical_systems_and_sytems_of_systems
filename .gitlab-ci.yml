@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Which Docker image shall be used on the GitLab runner?
-image: docker:19.03.3
+image: docker:19.03.5
 
 # Details about how to connect to the Docker service to run this build.
 variables:
