@@ -49,6 +49,8 @@ In addition we will encourage active listening and empathy between team members 
 - Encourage continuous productive feedback on tasks that are being done by other members to help prevent misunderstandings or disagreements.
 
 ## How do you plan to ensure responsible use of LLMs in your project and how do you transparently and traceability document the use of LLMs? 
-We will use LLMs to assist us in understanding course material, providing examples or assisting in debugging code. The idea is to see LLM as a tool and not a solution. Every member is aware of the use of LLMs and will document the usage of it.
+We will use LLMs to assist us in understanding course material, providing examples or assisting in debugging code. The idea is to see LLM as a tool and not a solution. Every member is aware of the use of LLMs and will document the usage of it by adding comments to the code or footnotes to text documents. 
+
+The team will acknowledge that all members are using LLMs and we will keep an open space to express our opinions on the usage of it for different parts of the project. This to increase the overall transparency given the usage of LLMs and to make sure that despite using these tools members are still learning and understanding the project.
 
 *After talking with the LLM we have decided that no suggestion was valuable.*
