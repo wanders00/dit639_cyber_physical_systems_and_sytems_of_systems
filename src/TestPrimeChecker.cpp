@@ -6,5 +6,5 @@
 // Test case to check if PrimeChecker correctly identifies a prime number.
 TEST_CASE("Test PrimeChecker 1.") {
     PrimeChecker pc;
-    REQUIRE(pc.isPrime(4));
+    REQUIRE(pc.isPrime(5));
 }
