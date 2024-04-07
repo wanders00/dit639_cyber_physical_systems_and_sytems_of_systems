@@ -1,3 +1,5 @@
+[![pipeline status](https://git.chalmers.se/courses/dit638/students/2024-group-13/badges/main/pipeline.svg)](https://git.chalmers.se/courses/dit638/students/2024-group-13/-/commits/main)
+
 # 2024-group-13
 
 ## Name <todo>
