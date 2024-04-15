@@ -34,6 +34,9 @@ docker run --rm CID/example:latest 42
 ## License
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
 
+## Project dependencies
+ - Docker
+
 ## Git Practices
 
 ### How to add new features
