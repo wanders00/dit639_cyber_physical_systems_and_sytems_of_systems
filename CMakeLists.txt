@@ -9,5 +9,5 @@ set(CMAKE_CXX_FLAGS "-fprofile-arcs -ftest-coverage")
 set(CMAKE_EXE_LINKER_FLAGS "-lgcov")
 
 enable_testing()
-add_executable(${PROJECT_NAME}-Runner src/TestPrimeChecker.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/PrimeChecker.cpp)
+add_executable(${PROJECT_NAME}-Runner test/TestPrimeChecker.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/PrimeChecker.cpp)
 add_test(NAME ${PROJECT_NAME}-Runner COMMAND ${PROJECT_NAME}-Runner)

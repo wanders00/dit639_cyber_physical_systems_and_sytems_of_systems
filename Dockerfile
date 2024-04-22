@@ -1,7 +1,6 @@
 ##################################################
 # Section 1: Build the application
 FROM ubuntu:22.04 as builder
-MAINTAINER Christian Berger christian.berger@gu.se
 
 RUN apt-get update -y && \
     apt-get upgrade -y && \
@@ -43,7 +42,6 @@ COPY --from=builder /tmp/coverage.xml .
 ##################################################
 # Section 3: Bundle the application.
 FROM ubuntu:22.04
-MAINTAINER Christian Berger christian.berger@gu.se
 
 RUN apt-get update -y && \
     apt-get upgrade -y && \
