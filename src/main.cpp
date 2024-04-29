@@ -13,10 +13,12 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include "ColorFilter.hpp"
+#include "ContourDetector.hpp"
 
 int32_t main(int32_t argc, char **argv) {
     int32_t retCode{1};
     ColorFilter colorFilter;
+    ContourDetector contourDetector;
 
     // Parse the command line parameters as we require the user to specify some mandatory information on startup.
     auto commandlineArguments = cluon::getCommandlineArguments(argc, argv);
@@ -99,6 +101,8 @@ int32_t main(int32_t argc, char **argv) {
                 cv::Mat combinedImage;
                 cv::bitwise_or(filteredImage.first, filteredImage.second, combinedImage);
 
+                contourDetector.findContours(filteredImage, original);
+                
                 // Display image on your screen.
                 if (VERBOSE) {
                     // cv::imshow("Filtered Yellow Image", filteredImage.first);
