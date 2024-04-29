@@ -101,8 +101,8 @@ int32_t main(int32_t argc, char **argv) {
 
                 // Display image on your screen.
                 if (VERBOSE) {
-                    cv::imshow("Filtered Yellow Image", filteredImage.first);
-                    cv::imshow("Filtered Blue Image", filteredImage.second);
+                    // cv::imshow("Filtered Yellow Image", filteredImage.first);
+                    // cv::imshow("Filtered Blue Image", filteredImage.second);
                     cv::imshow("Combined Image", combinedImage);
                     cv::imshow(sharedMemory->name().c_str(), img);
                     cv::waitKey(1);

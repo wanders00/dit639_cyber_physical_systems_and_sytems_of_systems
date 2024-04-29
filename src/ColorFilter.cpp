@@ -28,15 +28,29 @@ std::pair<cv::Mat, cv::Mat> ColorFilter::colorFilter(cv::Mat image) {
 
     int lowVBlue = 42;
     int highVBlue = 120;
+
+    int ReflectionLowHBlue = 0;
+    int ReflectionHighHBlue = 179;
+
+    int ReflectionLowSBlue = 50;
+    int ReflectionHighSBlue = 80;
+
+    int ReflectionLowVBlue = 0;
+    int ReflectionHighVBlue = 255;
     
     cv::Mat yellowImg;
     cv::Mat blueImg;
     cv::Mat filteredYellow;
     cv::Mat filteredBlue;
+    cv::Mat filteredReflection;
+    cv::Mat blueReflectionImg;
+    cv::Mat finalBlueImg;
+    cv::Mat blueImgAnd;
 
     // 
     cv::cvtColor(image, yellowImg, cv::COLOR_BGR2HSV);
     blueImg = yellowImg.clone();
+    blueReflectionImg = yellowImg.clone();
 
     // Threshold the HSV image, keep only the yellow pixels
     cv::inRange(yellowImg, cv::Scalar(lowHYellow, lowSYellow, lowVYellow),
@@ -48,7 +62,21 @@ std::pair<cv::Mat, cv::Mat> ColorFilter::colorFilter(cv::Mat image) {
               cv::Scalar(highHBlue, highSBlue, highVBlue),
               filteredBlue);
 
-    std::pair<cv::Mat, cv::Mat> imagePair = std::make_pair(filteredYellow, filteredBlue);
+    // Detect the large reflections
+    // Colour process to detect large reflections
+    cv::inRange(
+        blueReflectionImg,
+        cv::Scalar(ReflectionLowHBlue, ReflectionLowSBlue, ReflectionLowVBlue),
+        cv::Scalar(ReflectionHighHBlue, ReflectionHighSBlue,
+                 ReflectionHighVBlue), filteredReflection);
+
+    // Use bitwise AND operator to find reflections in blue cone image
+    cv::bitwise_and(filteredBlue, filteredReflection, blueImgAnd);
+
+    // Use bitwise XOR operator to remove found reflections from blue cone image
+    cv::bitwise_xor(blueImgAnd, filteredBlue, finalBlueImg);
+
+    std::pair<cv::Mat, cv::Mat> imagePair = std::make_pair(filteredYellow, finalBlueImg);
 
     return imagePair;
 }
