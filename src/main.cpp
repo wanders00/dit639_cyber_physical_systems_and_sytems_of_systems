@@ -12,8 +12,12 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include "ColorFilter.hpp"
+
 int32_t main(int32_t argc, char **argv) {
     int32_t retCode{1};
+    ColorFilter colorFilter;
+
     // Parse the command line parameters as we require the user to specify some mandatory information on startup.
     auto commandlineArguments = cluon::getCommandlineArguments(argc, argv);
     if ((0 == commandlineArguments.count("cid")) ||
@@ -88,8 +92,18 @@ int32_t main(int32_t argc, char **argv) {
                               << std::endl;
                 }
 
+                cv::Mat original = img.clone();
+                std::pair<cv::Mat, cv::Mat> filteredImage =
+                    colorFilter.colorFilter(original);
+                
+                cv::Mat combinedImage;
+                cv::bitwise_or(filteredImage.first, filteredImage.second, combinedImage);
+
                 // Display image on your screen.
                 if (VERBOSE) {
+                    // cv::imshow("Filtered Yellow Image", filteredImage.first);
+                    // cv::imshow("Filtered Blue Image", filteredImage.second);
+                    cv::imshow("Combined Image", combinedImage);
                     cv::imshow(sharedMemory->name().c_str(), img);
                     cv::waitKey(1);
                 }
