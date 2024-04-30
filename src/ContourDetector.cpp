@@ -14,7 +14,7 @@
 //std::pair<std::vector<cv::Point2f>, std::vector<cv::Point2f>> 
 void
 ContourDetector::findContours(std::pair<cv::Mat, cv::Mat> filteredImage, cv::Mat originalImage) {
-    const float CLUSTER_RANGE = 100.0;
+    const float CLUSTER_RANGE = 30.0;
 
     // Yellow contour calculation
     std::vector<std::vector<cv::Point>> yellowContours;
@@ -35,28 +35,76 @@ ContourDetector::findContours(std::pair<cv::Mat, cv::Mat> filteredImage, cv::Mat
     // Get moments and  mass centers for YELLOW:
     std::vector<cv::Point2f> yellowMassCenters(yellowContours.size());
     
-    for (unsigned int i = 0; i < yellowContours.size(); i++) {
-        cv::Moments yellowMoments = cv::moments(yellowContours[i], false);                 // Getting the moments
+    for (auto& contour : yellowContours) {
+        cv::Moments yellowMoments = cv::moments(contour, false);                 // Getting the moments
         if (yellowMoments.m00 != 0) { // Check to avoid division by zero
-            yellowMassCenters[i] = cv::Point2f(yellowMoments.m10 / yellowMoments.m00, yellowMoments.m01 / yellowMoments.m00);   // Mass centers
-            yellowMassCenters[i].y = yellowMassCenters[i].y + 240;
+            yellowMassCenters.push_back(cv::Point2f(yellowMoments.m10 / yellowMoments.m00, yellowMoments.m01 / yellowMoments.m00));   // Mass centers
+            //yellowMassCenters[i].y += 240; ??? why this line idk
         }
     }
-    
-    // OPTION: Draw targets on the YELLOW mass centers
+     
+    // See if there exists multiple mass centers for Yellow
+    if (yellowMassCenters.size() >= 2) {
+
+        // If they do, check if they are close to each other
+        for (unsigned int i = 0; i < (yellowMassCenters.size() - 1); i++) {
+            float y_value = yellowMassCenters[i].y - yellowMassCenters[i + 1].y;
+
+            // Check if the mass centers are close to each other
+            if (y_value < CLUSTER_RANGE) {
+                float x_value = yellowMassCenters[i].x - yellowMassCenters[i + 1].x;
+
+                if (x_value < CLUSTER_RANGE) {
+                    // Then remove one from the top of the frame to remove cluster
+                    yellowMassCenters.erase(yellowMassCenters.begin() + i);
+                    i--;
+                }
+            }
+        }
+    }
+  
+    // Draw circles on the YELLOW mass centers
+    for (auto& massCenter : yellowMassCenters) {
+        cv::circle(originalImage, massCenter, 5, cv::Scalar(0, 255, 0), -1);
+    }
 
     // Get moments and  mass centers for BLUE:
     std::vector<cv::Point2f> blueMassCenters(blueContours.size());
     
-    for (unsigned int i = 0; i < blueContours.size(); i++) {
-        cv::Moments blueMoments = cv::moments(blueContours[i], false);  // Getting the moments
-        if (blueMoments.m00 != 0) {     // Check to avoid division by zero
-            blueMassCenters[i] = cv::Point2f(blueMoments.m10 / blueMoments.m00, blueMoments.m01 / blueMoments.m00);   // Mass centers
-            blueMassCenters[i].y = blueMassCenters[i].y + 240;
+    for (auto& contour : blueContours) {
+        cv::Moments blueMoments = cv::moments(contour, false);                 // Getting the moments
+        if (blueMoments.m00 != 0) { // Check to avoid division by zero
+            blueMassCenters.push_back(cv::Point2f(blueMoments.m10 / blueMoments.m00, blueMoments.m01 / blueMoments.m00));   // Mass centers
+            //blueMassCenters[i].y += 240; ??? why this line idk
         }
     }
+
+    // See if there exists multiple mass centers for Blue
+    if (blueMassCenters.size() >= 2) {
+
+        // If they do, check if they are close to each other
+        for (unsigned int i = 0; i < (blueMassCenters.size() - 1); i++) {
+            float y_value = blueMassCenters[i].y - blueMassCenters[i + 1].y;
+
+            // Check if the mass centers are close to each other
+            if (y_value < CLUSTER_RANGE) {
+                float x_value = blueMassCenters[i].x - blueMassCenters[i + 1].x;
+
+                if (x_value < CLUSTER_RANGE) {
+                    // Then remove one from the top of the frame to remove cluster
+                    blueMassCenters.erase(blueMassCenters.begin() + i);
+                    i--;
+                }
+            }
+        }
+    }
+
     
-    // OPTION: Draw targets on the BLUE mass centers    
+    
+    // Draw circles on the BLUE mass centers
+    for (auto& massCenter : blueMassCenters) {
+        cv::circle(originalImage, massCenter, 5, cv::Scalar(0, 255, 0), -1);
+    }
         
     cv::imshow("Original", originalImage); //show contours in the original image
 

@@ -95,11 +95,16 @@ int32_t main(int32_t argc, char **argv) {
                 }
 
                 cv::Mat original = img.clone();
+                cv::Mat cropped = img.clone();
+                // draw a black rectangle on the top half of the image
+                cv::rectangle(cropped, cv::Point(0, 0), cv::Point(WIDTH, (HEIGHT / 2) + 15.0), cv::Scalar(0, 0, 0), -1);
                 std::pair<cv::Mat, cv::Mat> filteredImage =
-                    colorFilter.colorFilter(original);
+                    colorFilter.colorFilter(cropped);
                 
                 cv::Mat combinedImage;
+
                 cv::bitwise_or(filteredImage.first, filteredImage.second, combinedImage);
+                cv::rectangle(combinedImage, cv::Point(0, 0), cv::Point(WIDTH, (HEIGHT / 2) + 15.0), cv::Scalar(0, 100, 0), -1);
 
                 contourDetector.findContours(filteredImage, original);
                 
