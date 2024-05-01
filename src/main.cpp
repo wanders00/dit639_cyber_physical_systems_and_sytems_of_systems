@@ -97,9 +97,10 @@ int32_t main(int32_t argc, char **argv) {
                 // draw a black rectangle on the top half of the image
                 cv::rectangle(cropped, cv::Point(0, 0), cv::Point(WIDTH, (HEIGHT / 2) + 15.0), cv::Scalar(0, 0, 0), -1);
                 
-                // draw a black circle on the bottom middle of the frame to remove the car
-                cv::circle(cropped, cv::Point(WIDTH / 2, HEIGHT - 50), 70, cv::Scalar(0, 0, 0), -1);
+                // draw a black rectangle on the bottom middle of the frame to remove the car
+                cv::rectangle(cropped, cv::Point((WIDTH / 2) - 120, HEIGHT - 150), cv::Point((WIDTH / 2) + 120, HEIGHT), cv::Scalar(0, 0, 0), -1);
                 
+
                 std::pair<cv::Mat, cv::Mat> filteredImage =
                     colorFilter.colorFilter(cropped);                
                 
