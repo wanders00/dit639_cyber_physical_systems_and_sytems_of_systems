@@ -106,7 +106,7 @@ int32_t main(int32_t argc, char **argv) {
                 cv::bitwise_or(filteredImage.first, filteredImage.second, combinedImage);
                 cv::rectangle(combinedImage, cv::Point(0, 0), cv::Point(WIDTH, (HEIGHT / 2) + 15.0), cv::Scalar(0, 100, 0), -1);
 
-                contourDetector.findContours(filteredImage, original);
+                std::pair<std::vector<cv::Point2f>, std::vector<cv::Point2f>> massCenters = contourDetector.findContours(filteredImage, original);
                 
                 // Display image on your screen.
                 if (VERBOSE) {

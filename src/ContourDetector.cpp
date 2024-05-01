@@ -9,10 +9,9 @@
 * @param filteredImage: pair of blue and yellow images to find contours
 * @param originalImage: original image to draw contours on
 * @return pair of vectors of points
-    
+
 */
-//std::pair<std::vector<cv::Point2f>, std::vector<cv::Point2f>> 
-void
+std::pair<std::vector<cv::Point2f>, std::vector<cv::Point2f>> 
 ContourDetector::findContours(std::pair<cv::Mat, cv::Mat> filteredImage, cv::Mat originalImage) {
     const float CLUSTER_RANGE = 30.0;
 
@@ -108,4 +107,7 @@ ContourDetector::findContours(std::pair<cv::Mat, cv::Mat> filteredImage, cv::Mat
         
     cv::imshow("Original", originalImage); //show contours in the original image
 
+    // Create a pair of vectors of points
+    std::pair<std::vector<cv::Point2f>, std::vector<cv::Point2f>> massCenters = std::make_pair(yellowMassCenters, blueMassCenters);
+    return massCenters;
 }

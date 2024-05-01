@@ -7,8 +7,7 @@
 
 class ContourDetector{
     public: 
-    //std::pair<std::vector<cv::Point2f>, std::vector<cv::Point2f>> 
-    void
+    std::pair<std::vector<cv::Point2f>, std::vector<cv::Point2f>> 
     findContours(std::pair<cv::Mat, cv::Mat> filteredImage, cv::Mat originalImage);
 };
 
