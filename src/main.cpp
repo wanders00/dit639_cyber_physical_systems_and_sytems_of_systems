@@ -14,11 +14,13 @@
 
 #include "ColorFilter.hpp"
 #include "ContourDetector.hpp"
+#include "AngleCalculator.hpp"
 
 int32_t main(int32_t argc, char **argv) {
     int32_t retCode{1};
     ColorFilter colorFilter;
     ContourDetector contourDetector;
+    AngleCalculator angleCalculator;
 
     // Parse the command line parameters as we require the user to specify some mandatory information on startup.
     auto commandlineArguments = cluon::getCommandlineArguments(argc, argv);
@@ -56,7 +58,6 @@ int32_t main(int32_t argc, char **argv) {
                 // https://github.com/chrberger/libcluon/blob/master/libcluon/testsuites/TestEnvelopeConverter.cpp#L31-L40
                 std::lock_guard<std::mutex> lck(gsrMutex);
                 gsr = cluon::extractMessage<opendlv::proxy::GroundSteeringRequest>(std::move(env));
-                //std::cout << "lambda: groundSteering = " << gsr.groundSteering() << std::endl;
             };
 
             od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(), onGroundSteeringRequest);
@@ -90,15 +91,34 @@ int32_t main(int32_t argc, char **argv) {
 
                 sharedMemory->unlock();
 
+                cv::Mat original = img.clone();
+                cv::Mat cropped = img.clone();
+                
+                // draw a black rectangle on the top half of the image
+                cv::rectangle(cropped, cv::Point(0, 0), cv::Point(WIDTH, (HEIGHT / 2) + 15.0), cv::Scalar(0, 0, 0), -1);
+                
+                // draw a black circle on the bottom middle of the frame to remove the car
+                cv::circle(cropped, cv::Point(WIDTH / 2, HEIGHT - 50), 70, cv::Scalar(0, 0, 0), -1);
+                
+                std::pair<cv::Mat, cv::Mat> filteredImage =
+                    colorFilter.colorFilter(cropped);                
+                
+                cv::Mat combinedImage;
+
+                cv::bitwise_or(filteredImage.first, filteredImage.second, combinedImage);
+
+                std::pair<std::vector<cv::Point2f>, std::vector<cv::Point2f>> massCenters = contourDetector.findContours(filteredImage, original);
+                float directionAngle = angleCalculator.calculateTurnAngle(massCenters.first, massCenters.second);   // calculated turn angle
+                float steeringAngle = angleCalculator.calculateSteeringAngle(directionAngle);   // mapped steering angle
+                
                 // If you want to access the latest received ground steering, don't forget to lock the mutex:
                 {
                     std::lock_guard<std::mutex> lck(gsrMutex);
-                    //std::cout << "main: groundSteering = " << gsr.groundSteering() << std::endl;
                     std::string output =
                         "group_13;" +
                         std::to_string(frameTime) +
                         ";" +
-                        "0" + // '0' temporary value for ground steering
+                        std::to_string(steeringAngle) +
                         ";" + std::to_string(gsr.groundSteering()) +
                         ";" +
                         "\n";
@@ -115,20 +135,6 @@ int32_t main(int32_t argc, char **argv) {
                     previousFrameTime = frameTime;
                 }
 
-                cv::Mat original = img.clone();
-                cv::Mat cropped = img.clone();
-                // draw a black rectangle on the top half of the image
-                cv::rectangle(cropped, cv::Point(0, 0), cv::Point(WIDTH, (HEIGHT / 2) + 15.0), cv::Scalar(0, 0, 0), -1);
-                std::pair<cv::Mat, cv::Mat> filteredImage =
-                    colorFilter.colorFilter(cropped);
-                
-                cv::Mat combinedImage;
-
-                cv::bitwise_or(filteredImage.first, filteredImage.second, combinedImage);
-                cv::rectangle(combinedImage, cv::Point(0, 0), cv::Point(WIDTH, (HEIGHT / 2) + 15.0), cv::Scalar(0, 100, 0), -1);
-
-                std::pair<std::vector<cv::Point2f>, std::vector<cv::Point2f>> massCenters = contourDetector.findContours(filteredImage, original);
-                
                 // Display image on your screen.
                 if (VERBOSE) {
                     // cv::imshow("Filtered Yellow Image", filteredImage.first);
