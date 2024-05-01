@@ -1,0 +1,5 @@
+recordings/
+.git/
+.gitignore/
+*.md
+.gitlab-ci.yml
