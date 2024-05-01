@@ -75,3 +75,10 @@ _deps
 
 # Build folder
 /build
+
+# Ignore all .csv files (except in the csv folder)
+*.csv
+!/verifier/csv/**/*.csv
+
+# Ignore all .png
+*.png

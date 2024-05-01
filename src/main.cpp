@@ -54,10 +54,17 @@ int32_t main(int32_t argc, char **argv) {
                 // https://github.com/chrberger/libcluon/blob/master/libcluon/testsuites/TestEnvelopeConverter.cpp#L31-L40
                 std::lock_guard<std::mutex> lck(gsrMutex);
                 gsr = cluon::extractMessage<opendlv::proxy::GroundSteeringRequest>(std::move(env));
-                // std::cout << "lambda: groundSteering = " << gsr.groundSteering() << std::endl;
+                //std::cout << "lambda: groundSteering = " << gsr.groundSteering() << std::endl;
             };
 
             od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(), onGroundSteeringRequest);
+
+            std::ofstream out;
+            if (commandlineArguments.count("output") != 0) {
+                out.open(commandlineArguments["output"]);
+            }
+
+            int64_t previousFrameTime = 0;
 
             // Endless loop; end the program by pressing Ctrl-C.
             while (od4.isRunning()) {
@@ -84,12 +91,26 @@ int32_t main(int32_t argc, char **argv) {
                 // If you want to access the latest received ground steering, don't forget to lock the mutex:
                 {
                     std::lock_guard<std::mutex> lck(gsrMutex);
-                    // std::cout << "main: groundSteering = " << gsr.groundSteering() << std::endl;
-                    std::cout << "group_13;"
-                              << std::to_string(frameTime)
-                              << ";"
-                              << "0" // Temporary placeholder for computed ground steering
-                              << std::endl;
+                    //std::cout << "main: groundSteering = " << gsr.groundSteering() << std::endl;
+                    std::string output =
+                        "group_13;" +
+                        std::to_string(frameTime) +
+                        ";" +
+                        "0" + // '0' temporary value for ground steering
+                        ";" + std::to_string(gsr.groundSteering()) +
+                        ";" +
+                        "\n";
+
+                    // Only print if the timestamp is not the same as the previous one
+                    if (frameTime != previousFrameTime) {
+                        std::cout << output;
+                        if (out.is_open()) {
+                            out << output;
+                        }
+                    }
+
+                    // Update the previous timestamp
+                    previousFrameTime = frameTime;
                 }
 
                 cv::Mat original = img.clone();
@@ -107,6 +128,10 @@ int32_t main(int32_t argc, char **argv) {
                     cv::imshow(sharedMemory->name().c_str(), img);
                     cv::waitKey(1);
                 }
+            }
+
+            if (out.is_open()) {
+                out.close();
             }
         }
         retCode = 0;
