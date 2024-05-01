@@ -13,10 +13,12 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include "ColorFilter.hpp"
+#include "ContourDetector.hpp"
 
 int32_t main(int32_t argc, char **argv) {
     int32_t retCode{1};
     ColorFilter colorFilter;
+    ContourDetector contourDetector;
 
     // Parse the command line parameters as we require the user to specify some mandatory information on startup.
     auto commandlineArguments = cluon::getCommandlineArguments(argc, argv);
@@ -114,12 +116,19 @@ int32_t main(int32_t argc, char **argv) {
                 }
 
                 cv::Mat original = img.clone();
+                cv::Mat cropped = img.clone();
+                // draw a black rectangle on the top half of the image
+                cv::rectangle(cropped, cv::Point(0, 0), cv::Point(WIDTH, (HEIGHT / 2) + 15.0), cv::Scalar(0, 0, 0), -1);
                 std::pair<cv::Mat, cv::Mat> filteredImage =
-                    colorFilter.colorFilter(original);
+                    colorFilter.colorFilter(cropped);
                 
                 cv::Mat combinedImage;
-                cv::bitwise_or(filteredImage.first, filteredImage.second, combinedImage);
 
+                cv::bitwise_or(filteredImage.first, filteredImage.second, combinedImage);
+                cv::rectangle(combinedImage, cv::Point(0, 0), cv::Point(WIDTH, (HEIGHT / 2) + 15.0), cv::Scalar(0, 100, 0), -1);
+
+                std::pair<std::vector<cv::Point2f>, std::vector<cv::Point2f>> massCenters = contourDetector.findContours(filteredImage, original);
+                
                 // Display image on your screen.
                 if (VERBOSE) {
                     // cv::imshow("Filtered Yellow Image", filteredImage.first);
