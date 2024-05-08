@@ -12,7 +12,7 @@
 */
 std::pair<std::vector<cv::Point2f>, std::vector<cv::Point2f>> 
 ContourDetector::findContours(std::pair<cv::Mat, cv::Mat> filteredImage, cv::Mat originalImage) {
-    const float CLUSTER_RANGE = 30.0;
+    const float CLUSTER_RANGE = 20.0;
 
     // Yellow contour calculation
     std::vector<std::vector<cv::Point>> yellowContours;
