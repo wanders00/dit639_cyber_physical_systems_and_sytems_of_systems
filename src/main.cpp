@@ -12,9 +12,9 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include "AngleCalculator.hpp"
 #include "ColorFilter.hpp"
 #include "ContourDetector.hpp"
-#include "AngleCalculator.hpp"
 
 int32_t main(int32_t argc, char **argv) {
     int32_t retCode{1};
@@ -41,6 +41,7 @@ int32_t main(int32_t argc, char **argv) {
         const uint32_t WIDTH{static_cast<uint32_t>(std::stoi(commandlineArguments["width"]))};
         const uint32_t HEIGHT{static_cast<uint32_t>(std::stoi(commandlineArguments["height"]))};
         const bool VERBOSE{commandlineArguments.count("verbose") != 0};
+        const bool COMPARE{commandlineArguments.count("compare") != 0};
 
         // Attach to the shared memory.
         std::unique_ptr<cluon::SharedMemory> sharedMemory{new cluon::SharedMemory{NAME}};
@@ -93,36 +94,47 @@ int32_t main(int32_t argc, char **argv) {
 
                 cv::Mat original = img.clone();
                 cv::Mat cropped = img.clone();
-                
+
                 // draw a black rectangle on the top half of the image
                 cv::rectangle(cropped, cv::Point(0, 0), cv::Point(WIDTH, (HEIGHT / 2) + 15.0), cv::Scalar(0, 0, 0), -1);
-                
+
                 // draw a black rectangle on the bottom middle of the frame to remove the car
                 cv::rectangle(cropped, cv::Point((WIDTH / 2) - 120, HEIGHT - 100), cv::Point((WIDTH / 2) + 120, HEIGHT), cv::Scalar(0, 0, 0), -1);
-                
 
                 std::pair<cv::Mat, cv::Mat> filteredImage =
-                    colorFilter.colorFilter(cropped);                
-                
+                    colorFilter.colorFilter(cropped);
+
                 cv::Mat combinedImage;
 
                 cv::bitwise_or(filteredImage.first, filteredImage.second, combinedImage);
 
                 std::pair<std::vector<cv::Point2f>, std::vector<cv::Point2f>> massCenters = contourDetector.findContours(filteredImage, original);
-                float directionAngle = angleCalculator.calculateTurnAngle(massCenters.first, massCenters.second);   // calculated turn angle
-                float steeringAngle = angleCalculator.calculateSteeringAngle(directionAngle);   // mapped steering angle
-                
+                // calculated turn angle
+                float directionAngle = angleCalculator.calculateTurnAngle(massCenters.first, massCenters.second);
+                // mapped steering angle
+                float steeringAngle = angleCalculator.calculateSteeringAngle(directionAngle);
+
                 // If you want to access the latest received ground steering, don't forget to lock the mutex:
                 {
                     std::lock_guard<std::mutex> lck(gsrMutex);
                     std::string output =
+                        // Group ID
                         "group_13;" +
+
+                        // Frame time
                         std::to_string(frameTime) +
+
                         ";" +
+                        // Computed Steering angle
                         std::to_string(steeringAngle) +
-                        ";" + std::to_string(gsr.groundSteering()) +
-                        ";" +
-                        "\n";
+                        ";";
+
+                    // If the compare argument is passed, add the ground steering to the output
+                    if (COMPARE) {
+                        output += std::to_string(gsr.groundSteering()) + ";";
+                    }
+
+                    output += "\n";
 
                     // Only print if the timestamp is not the same as the previous one
                     if (frameTime != previousFrameTime) {
@@ -140,6 +152,7 @@ int32_t main(int32_t argc, char **argv) {
                 if (VERBOSE) {
                     // cv::imshow("Filtered Yellow Image", filteredImage.first);
                     // cv::imshow("Filtered Blue Image", filteredImage.second);
+                    cv::imshow("Original Image", original);
                     cv::imshow("Combined Image", combinedImage);
                     cv::imshow(sharedMemory->name().c_str(), img);
                     cv::waitKey(1);

@@ -24,8 +24,7 @@ WORKDIR /opt/sources
 
 RUN g++ -I/usr/include/python3.10 -o PerformanceTester.out PerformanceTester.cpp -lpython3.10
 
-RUN chmod +x ./runner.sh && \
-    ./runner.sh
+RUN ./PerformanceTester.out 144821 145043 145233 145641 150001
 
 ##################################################
 # Section 2: Save the output 

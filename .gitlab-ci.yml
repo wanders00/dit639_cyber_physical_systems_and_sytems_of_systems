@@ -57,10 +57,15 @@ build-images:
     - docker-build
   stage: build
   script:
-    - docker build -t $CI_REGISTRY_IMAGE/video-h264-replay -f Dockerfile https://github.com/chalmers-revere/opendlv-video-h264-replay.git#v0.0.4
-    - docker push $CI_REGISTRY_IMAGE/video-h264-replay
-    - docker build -f Dockerfile -t $CI_REGISTRY_IMAGE/application .
-    - docker push $CI_REGISTRY_IMAGE/application
+    # Pull the image if it exists, otherwise build it and push it to the registry.
+    - |
+      docker pull $CI_REGISTRY_IMAGE/video-h264-replay || (
+        docker build -t $CI_REGISTRY_IMAGE/video-h264-replay -f Dockerfile https://github.com/chalmers-revere/opendlv-video-h264-replay.git#v0.0.4 && 
+        docker push $CI_REGISTRY_IMAGE/video-h264-replay
+      )
+    # Build the application image and push it to the registry.
+    - docker build -f Dockerfile -t $CI_REGISTRY_IMAGE/application:$CI_COMMIT_SHORT_SHA .
+    - docker push $CI_REGISTRY_IMAGE/application:$CI_COMMIT_SHORT_SHA
 
 # This section describes what shall be done to generate the CSV files for the performance analysis.
 # This is a template that is used to generate the CSV files for the performance analysis.
@@ -73,15 +78,17 @@ build-images:
     - build-images
   script:
     - docker pull $CI_REGISTRY_IMAGE/video-h264-replay
-    - docker pull $CI_REGISTRY_IMAGE/application
+    - docker pull $CI_REGISTRY_IMAGE/application:$CI_COMMIT_SHORT_SHA
     - echo "Processing $FILE.rec"
     - docker run -d --rm -ti --net=host --ipc=host -e DISPLAY=$DISPLAY -v /tmp:/tmp -v $(pwd)/recordings:/recordings --name=replay-$FILE $CI_REGISTRY_IMAGE/video-h264-replay --cid=111 --name=img /recordings/$FILE.rec
     - sleep 1
-    - docker run -d --net=host --ipc=host -e DISPLAY=$DISPLAY -v /tmp:/tmp --name=application-$FILE $CI_REGISTRY_IMAGE/application:latest --cid=111 --name=img --width=640 --height=480 --output=$FILE.csv
+    - docker run -d --net=host --ipc=host -e DISPLAY=$DISPLAY -v /tmp:/tmp --name=application-$FILE $CI_REGISTRY_IMAGE/application:$CI_COMMIT_SHORT_SHA --cid=111 --name=img --width=640 --height=480 --output=$FILE.csv --compare
     - while docker ps | grep -q replay-$FILE; do sleep 1; done
     - mkdir -p ./verifier/csv/
     - docker cp application-$FILE:./opt/$FILE.csv ./verifier/csv/$FILE.csv
+    - if [ ! -s ./verifier/csv/$FILE.csv ]; then sleep 10; docker cp application-$FILE:./opt/$FILE.csv ./verifier/csv/$FILE.csv; fi
     - docker stop application-$FILE || true && docker rm application-$FILE || true
+    - if [ ! -s ./verifier/csv/$FILE.csv ]; then echo "File copy failed, file size is 0"; exit 1; fi
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-csv"
     paths:
@@ -171,6 +178,4 @@ release:
     - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
   
   script:
-    # - docker build -f Dockerfile -t "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG" .
-    # - docker push "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG"
     - docker buildx build --platform $BUILDX_PLATFORM -t "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG" --push .

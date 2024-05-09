@@ -103,8 +103,6 @@ ContourDetector::findContours(std::pair<cv::Mat, cv::Mat> filteredImage, cv::Mat
     for (auto& massCenter : blueMassCenters) {
         cv::circle(originalImage, massCenter, 5, cv::Scalar(0, 255, 0), -1);
     }
-        
-    cv::imshow("Original", originalImage); //show contours in the original image
 
     // Create a pair of vectors of points
     std::pair<std::vector<cv::Point2f>, std::vector<cv::Point2f>> massCenters = std::make_pair(yellowMassCenters, blueMassCenters);
