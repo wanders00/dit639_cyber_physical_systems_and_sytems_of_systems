@@ -77,6 +77,34 @@ std::pair<cv::Mat, cv::Mat> ColorFilter::colorFilter(cv::Mat image) {
     cv::bitwise_xor(blueImgAnd, filteredBlue, finalBlueImg);
 
     std::pair<cv::Mat, cv::Mat> imagePair = std::make_pair(filteredYellow, finalBlueImg);
+    
 
-    return imagePair;
+    // Filter image to fill gaps and remove small objects
+    std::pair<cv::Mat, cv::Mat> filteredImage;
+
+    //Yellow cones fill holes in objects 
+    cv::dilate(imagePair.first, filteredImage.first,
+                cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(8, 8)));
+    cv::erode(filteredImage.first, filteredImage.first,
+                cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(8, 8)));
+
+    // Remove small objects for yellow cones
+    cv::erode(filteredImage.first, filteredImage.first,
+                cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
+    cv::dilate(filteredImage.first, filteredImage.first,
+                cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(7, 7)));
+
+    // fill holes in objects - blue cones
+    cv::dilate(imagePair.second, filteredImage.second,
+                cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(8, 8)));
+    cv::erode(filteredImage.second, filteredImage.second,
+                cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(8, 8)));
+
+    // remove small objects - blue cones
+    cv::erode(filteredImage.second, filteredImage.second,
+                cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
+    cv::dilate(filteredImage.second, filteredImage.second,
+                cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(7, 7)));
+
+    return filteredImage;
 }
