@@ -101,7 +101,7 @@ set(LIBRARIES ${LIBRARIES} ${OpenCV_LIBS})
 add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
                 ${CMAKE_CURRENT_SOURCE_DIR}/src/ColorFilter.cpp
                 ${CMAKE_CURRENT_SOURCE_DIR}/src/ContourDetector.cpp
-                ${CMAKE_CURRENT_SOURCE_DIR}/src/AngleCalculator.cpp)
+                ${CMAKE_CURRENT_SOURCE_DIR}/src/AngularVelocityAngleCalculator.cpp)
 target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
 
 # Add dependency to OpenDLV Standard Message Set.
