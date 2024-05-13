@@ -66,6 +66,8 @@ build-images:
     # Build the application image and push it to the registry.
     - docker build -f Dockerfile -t $CI_REGISTRY_IMAGE/application:$CI_COMMIT_SHORT_SHA .
     - docker push $CI_REGISTRY_IMAGE/application:$CI_COMMIT_SHORT_SHA
+  except:
+    - tags
 
 # This section describes what shall be done to generate the CSV files for the performance analysis.
 # This is a template that is used to generate the CSV files for the performance analysis.
@@ -89,6 +91,8 @@ build-images:
     - if [ ! -s ./verifier/csv/$FILE.csv ]; then sleep 10; docker cp application-$FILE:./opt/$FILE.csv ./verifier/csv/$FILE.csv; fi
     - docker stop application-$FILE || true && docker rm application-$FILE || true
     - if [ ! -s ./verifier/csv/$FILE.csv ]; then echo "File copy failed, file size is 0"; exit 1; fi
+  except:
+    - tags
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-csv"
     paths:
@@ -148,6 +152,8 @@ analyze-performance:
     - cd verifier
     - mkdir output
     - docker build -f Dockerfile.verifier -t performance_tester . --output ./output/
+  except:
+    - tags
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-performance"
     paths:
