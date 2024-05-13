@@ -165,13 +165,21 @@ int32_t main(int32_t argc, char **argv) {
                     previousFrameTime = frameTime;
                 }
 
+                // Draw debug text on image
+                // Grp ID
+                // Current Timestamp
+                // Computed Steering Angle
+                // Number of blue and yellow cones detected
+                cv::putText(original, "Group 13", cv::Point(10, 30), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 255), 2);
+                cv::putText(original, "Timestamp: " + std::to_string(frameTime), cv::Point(10, 60), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 255), 2);
+                cv::putText(original, "Steering Angle: " + std::to_string(steeringAngle), cv::Point(10, 90), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 255), 2);
+                cv::putText(original, "Yellow Cones: " + std::to_string(massCenters.first.size()), cv::Point(10, 120), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 255), 2);
+                cv::putText(original, "Blue Cones: " + std::to_string(massCenters.second.size()), cv::Point(10, 150), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 255), 2);                
+
                 // Display image on your screen.
                 if (VERBOSE) {
-                    // cv::imshow("Filtered Yellow Image", filteredImage.first);
-                    // cv::imshow("Filtered Blue Image", filteredImage.second);
                     cv::imshow("Original Image", original);
                     cv::imshow("Combined Image", combinedImage);
-                    cv::imshow(sharedMemory->name().c_str(), img);
                     cv::waitKey(1);
                 }
             }
