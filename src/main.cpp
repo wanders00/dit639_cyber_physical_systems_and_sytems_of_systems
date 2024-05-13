@@ -12,7 +12,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include "AngleCalculator.hpp"
+// #include "AngleCalculator.hpp"
+#include "AngularVelocityAngleCalculator.hpp"
 #include "ColorFilter.hpp"
 #include "ContourDetector.hpp"
 
@@ -20,7 +21,8 @@ int32_t main(int32_t argc, char **argv) {
     int32_t retCode{1};
     ColorFilter colorFilter;
     ContourDetector contourDetector;
-    AngleCalculator angleCalculator;
+    // ImageAngleCalculator angleCalculatorImg;
+    AngularVelocityAngleCalculator angleCalculatorAV;
 
     // Parse the command line parameters as we require the user to specify some mandatory information on startup.
     auto commandlineArguments = cluon::getCommandlineArguments(argc, argv);
@@ -52,16 +54,25 @@ int32_t main(int32_t argc, char **argv) {
             // The instance od4 allows you to send and receive messages.
             cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(commandlineArguments["cid"]))};
 
+            // Register a trigger to receive GroundSteeringRequest messages.
             opendlv::proxy::GroundSteeringRequest gsr;
             std::mutex gsrMutex;
             auto onGroundSteeringRequest = [&gsr, &gsrMutex](cluon::data::Envelope &&env) {
                 // The envelope data structure provide further details, such as sampleTimePoint as shown in this test case:
                 // https://github.com/chrberger/libcluon/blob/master/libcluon/testsuites/TestEnvelopeConverter.cpp#L31-L40
-                std::lock_guard<std::mutex> lck(gsrMutex);
+                std::lock_guard<std::mutex> lck_gsr(gsrMutex);
                 gsr = cluon::extractMessage<opendlv::proxy::GroundSteeringRequest>(std::move(env));
             };
-
             od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(), onGroundSteeringRequest);
+
+            // Register a trigger to receive AngularVelocityReading messages.
+            opendlv::proxy::AngularVelocityReading avr;
+            std::mutex avrMutex;
+            auto onAngularVelocityReading = [&avr, &avrMutex](cluon::data::Envelope &&env) {
+                std::lock_guard<std::mutex> lck_avr(avrMutex);
+                avr = cluon::extractMessage<opendlv::proxy::AngularVelocityReading>(std::move(env));
+            };
+            od4.dataTrigger(opendlv::proxy::AngularVelocityReading::ID(), onAngularVelocityReading);
 
             std::ofstream out;
             if (commandlineArguments.count("output") != 0) {
@@ -109,14 +120,20 @@ int32_t main(int32_t argc, char **argv) {
                 cv::bitwise_or(filteredImage.first, filteredImage.second, combinedImage);
 
                 std::pair<std::vector<cv::Point2f>, std::vector<cv::Point2f>> massCenters = contourDetector.findContours(filteredImage, original);
+
+                /* Image based angle calculation
                 // calculated turn angle
                 float directionAngle = angleCalculator.calculateTurnAngle(massCenters.first, massCenters.second);
                 // mapped steering angle
                 float steeringAngle = angleCalculator.calculateSteeringAngle(directionAngle);
+                */
+
+                // Calculate the steering angle based on the angular velocity
+                float steeringAngle = angleCalculatorAV.calculateSteeringAngle(avr.angularVelocityZ());
 
                 // If you want to access the latest received ground steering, don't forget to lock the mutex:
                 {
-                    std::lock_guard<std::mutex> lck(gsrMutex);
+                    std::lock_guard<std::mutex> lck_gsr(gsrMutex);
                     std::string output =
                         // Group ID
                         "group_13;" +
