@@ -80,9 +80,9 @@ build-images:
     - docker pull $CI_REGISTRY_IMAGE/video-h264-replay
     - docker pull $CI_REGISTRY_IMAGE/application:$CI_COMMIT_SHORT_SHA
     - echo "Processing $FILE.rec"
-    - docker run -d --rm -ti --net=host --ipc=host -e DISPLAY=$DISPLAY -v /tmp:/tmp -v $(pwd)/recordings:/recordings --name=replay-$FILE $CI_REGISTRY_IMAGE/video-h264-replay --cid=111 --name=img /recordings/$FILE.rec
+    - docker run -d --rm -ti --net=host --ipc=host -e DISPLAY=$DISPLAY -v /tmp:/tmp -v $(pwd)/recordings:/recordings --name=replay-$FILE $CI_REGISTRY_IMAGE/video-h264-replay --cid=$CID --name=$IMG /recordings/$FILE.rec
     - sleep 1
-    - docker run -d --net=host --ipc=host -e DISPLAY=$DISPLAY -v /tmp:/tmp --name=application-$FILE $CI_REGISTRY_IMAGE/application:$CI_COMMIT_SHORT_SHA --cid=111 --name=img --width=640 --height=480 --output=$FILE.csv --compare
+    - docker run -d --net=host --ipc=host -e DISPLAY=$DISPLAY -v /tmp:/tmp --name=application-$FILE $CI_REGISTRY_IMAGE/application:$CI_COMMIT_SHORT_SHA --cid=$CID --name=$IMG --width=640 --height=480 --output=$FILE.csv --compare
     - while docker ps | grep -q replay-$FILE; do sleep 1; done
     - mkdir -p ./verifier/csv/
     - docker cp application-$FILE:./opt/$FILE.csv ./verifier/csv/$FILE.csv
@@ -101,26 +101,36 @@ generate-csv-144821:
   <<: *generate-csv-template
   variables:
     FILE: "144821"
+    CID: "111"
+    IMG: "img1"
 
 generate-csv-145043:
   <<: *generate-csv-template
   variables:
     FILE: "145043"
+    CID: "112"
+    IMG: "img2"
 
 generate-csv-145233:
   <<: *generate-csv-template
   variables:
     FILE: "145233"
+    CID: "113"
+    IMG: "img3"
 
 generate-csv-145641:
   <<: *generate-csv-template
   variables:
     FILE: "145641"
+    CID: "114"
+    IMG: "img4"
 
 generate-csv-150001:
   <<: *generate-csv-template
   variables:
     FILE: "150001"
+    CID: "115"
+    IMG: "img5"
 
 # This section describes what shall be done to analyze the CSV files for the performance analysis.
 analyze-performance:
