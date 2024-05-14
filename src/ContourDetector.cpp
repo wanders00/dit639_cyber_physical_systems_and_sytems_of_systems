@@ -5,11 +5,14 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-/*Function to find contours of an image
-* @param filteredImage: pair of blue and yellow images to find contours
-* @param originalImage: original image to draw contours on
-* @return pair of vectors of points
-*/
+/**
+ * Function to find contours of an image
+ *
+ * @param filteredImage: pair of blue and yellow images to find contours
+ * @param originalImage: original image to draw contours on
+ *
+ * @return pair of vectors of points
+ */
 std::pair<std::vector<cv::Point2f>, std::vector<cv::Point2f>> 
 ContourDetector::findContours(std::pair<cv::Mat, cv::Mat> filteredImage, cv::Mat originalImage) {
     const float CLUSTER_RANGE = 20.0;
@@ -33,11 +36,11 @@ ContourDetector::findContours(std::pair<cv::Mat, cv::Mat> filteredImage, cv::Mat
     // Get moments and  mass centers for YELLOW:
     std::vector<cv::Point2f> yellowMassCenters(yellowContours.size());
     
+    // LLM: Used GitHub Copilot to debug and fix this loop
     for (auto& contour : yellowContours) {
         cv::Moments yellowMoments = cv::moments(contour, false);                 // Getting the moments
         if (yellowMoments.m00 != 0) { // Check to avoid division by zero
             yellowMassCenters.push_back(cv::Point2f(yellowMoments.m10 / yellowMoments.m00, yellowMoments.m01 / yellowMoments.m00));   // Mass centers
-            //yellowMassCenters[i].y += 240; ??? why this line idk
         }
     }
      
@@ -73,7 +76,6 @@ ContourDetector::findContours(std::pair<cv::Mat, cv::Mat> filteredImage, cv::Mat
         cv::Moments blueMoments = cv::moments(contour, false);                 // Getting the moments
         if (blueMoments.m00 != 0) { // Check to avoid division by zero
             blueMassCenters.push_back(cv::Point2f(blueMoments.m10 / blueMoments.m00, blueMoments.m01 / blueMoments.m00));   // Mass centers
-            //blueMassCenters[i].y += 240; ??? why this line idk
         }
     }
 
