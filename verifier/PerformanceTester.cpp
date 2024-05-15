@@ -86,12 +86,14 @@ int readCSV(const std::string& filename, std::vector<int64_t>& x, std::vector<do
  * @param y2 The y2 data
  *
  * @return The match percentage
+ *
+ * @note LLM: This entire function was created in assistance with GitHub Copilot to formulate the math for the match percentage
  */
 double print_match_percentage(const std::string& filename, const std::vector<int64_t>& x, const std::vector<double>& y1, const std::vector<double>& y2) {
     int count = 0;
     int valid_points = 0;
     for (size_t i = 0; i < y1.size(); ++i) {
-        if (y2[i] == 0) continue;  // Skip if y2 is 0
+        if (y2[i] == 0) continue; 
 
         valid_points++;
         if (std::abs(y1[i] - y2[i]) <= 0.25 * std::abs(y2[i])) {

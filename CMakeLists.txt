@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Based on template by Christian Berger:
+# https://github.com/chalmers-revere/working-with-rec-files/blob/master/cpp-opencv/CMakeLists.txt
 # Modified by Group 13, DIT639, 2024
 
 cmake_minimum_required(VERSION 3.2)

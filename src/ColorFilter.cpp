@@ -5,7 +5,6 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-//todo add namespace uwu
 
 std::pair<cv::Mat, cv::Mat> ColorFilter::colorFilter(cv::Mat image) {
     
@@ -70,6 +69,7 @@ std::pair<cv::Mat, cv::Mat> ColorFilter::colorFilter(cv::Mat image) {
         cv::Scalar(ReflectionHighHBlue, ReflectionHighSBlue,
                  ReflectionHighVBlue), filteredReflection);
 
+    // LLM: Bitwise operations were generated with GitHub Copilot
     // Use bitwise AND operator to find reflections in blue cone image
     cv::bitwise_and(filteredBlue, filteredReflection, blueImgAnd);
 
@@ -83,6 +83,7 @@ std::pair<cv::Mat, cv::Mat> ColorFilter::colorFilter(cv::Mat image) {
     std::pair<cv::Mat, cv::Mat> filteredImage;
 
     //Yellow cones fill holes in objects 
+    // LLM: Used GitHub Copilot to fine tune the values for erosion and dilation
     cv::dilate(imagePair.first, filteredImage.first,
                 cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(8, 8)));
     cv::erode(filteredImage.first, filteredImage.first,
