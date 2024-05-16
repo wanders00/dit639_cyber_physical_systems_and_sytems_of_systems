@@ -142,22 +142,20 @@ int32_t main(int32_t argc, char **argv) {
                         std::to_string(frameTime) +
 
                         ";" +
+
                         // Computed Steering angle
-                        std::to_string(steeringAngle) +
-                        ";";
+                        std::to_string(steeringAngle);
 
                     // If the compare argument is passed, add the ground steering to the output
                     if (COMPARE) {
-                        output += std::to_string(gsr.groundSteering()) + ";";
+                        output += ";" + std::to_string(gsr.groundSteering()) + ";";
                     }
-
-                    output += "\n";
 
                     // Only print if the timestamp is not the same as the previous one
                     if (frameTime != previousFrameTime) {
-                        std::cout << output;
+                        std::cout << output << std::endl;
                         if (out.is_open()) {
-                            out << output;
+                            out << output << std::endl;
                         }
                     }
 
@@ -174,7 +172,7 @@ int32_t main(int32_t argc, char **argv) {
                 cv::putText(original, "Timestamp: " + std::to_string(frameTime), cv::Point(10, 60), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 255), 2);
                 cv::putText(original, "Steering Angle: " + std::to_string(steeringAngle), cv::Point(10, 90), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 255), 2);
                 cv::putText(original, "Yellow Cones: " + std::to_string(massCenters.first.size()), cv::Point(10, 120), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 255), 2);
-                cv::putText(original, "Blue Cones: " + std::to_string(massCenters.second.size()), cv::Point(10, 150), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 255), 2);                
+                cv::putText(original, "Blue Cones: " + std::to_string(massCenters.second.size()), cv::Point(10, 150), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 255), 2);
 
                 // Display image on your screen.
                 if (VERBOSE) {
