@@ -1,5 +1,5 @@
-[![pipeline status](https://git.chalmers.se/courses/dit638/students/2024-group-13/badges/main/pipeline.svg)](https://git.chalmers.se/courses/dit638/students/2024-group-13/-/commits/main)
-[![coverage](https://git.chalmers.se/courses/dit638/students/2024-group-13/badges/main/coverage.svg)](https://git.chalmers.se/courses/dit638/students/2024-group-13/-/commits/main)
+![pipeline](https://github.com/wanders00/dit639_cyber_physical_systems_and_sytems_of_systems/assets/124396639/e234875c-a265-41ef-9d57-6cda4096566a)
+![coverage](https://github.com/wanders00/dit639_cyber_physical_systems_and_sytems_of_systems/assets/124396639/1b77c071-6200-4c32-805d-2b699084ff5e)
 
 # 2024-group-13
 
@@ -15,11 +15,23 @@ git clone <URL of the repository>
 ```
 2. Build the Docker image with the following command:
 ```bash
-docker build -t CID/example:latest -f Dockerfile .
+docker build -t application -f Dockerfile .
 ```
 3. Run the program with the following command:
 ```bash
-docker run --rm CID/example:latest 42
+docker run -d --net=host --ipc=host -e DISPLAY=$DISPLAY -v /tmp:/tmp application --cid=<id> --name=<name> --width=640 --height=480 --verbose
+```
+
+#### Example usage with opendlv-video-h264-replay (with WSL/Linux)
+
+1. Go to [link](https://github.com/chalmers-revere/opendlv-video-h264-replay) and follow installation instructions.
+
+2. Run the following commands:
+```bash
+docker run -d --rm -ti --net=host --ipc=host -e DISPLAY=$DISPLAY -v /tmp:/tmp -v $(pwd)/recordings:/recordings video-h264-replay --cid=111 --name=img1 /recordings/144821.rec && \
+sleep 1 && /
+docker run -d --net=host --ipc=host -e DISPLAY=$DISPLAY -v /tmp:/tmp application --cid=111 --name=img1 --width=640 --height=480 --verbose
+# Note: The Docker container for the application does not automatically delete itself once it is done running.
 ```
 
 ## Authors and acknowledgment
